@@ -1,0 +1,208 @@
+openapi: 3.0.3
+info:
+  title: NCAA Football Game Outcome Predictor API
+  version: 1.0.0
+  description: Core API for schedule, teams, rosters, and predictions
+servers:
+  - url: http://localhost:5000/api
+paths:
+  /schedule/upcoming:
+    get:
+      summary: List upcoming games
+      responses:
+        '200':
+          description: List of upcoming games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+  /schedule/{gameId}:
+    get:
+      summary: Get detailed game info
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Game details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Game'
+  /teams:
+    get:
+      summary: List teams
+      responses:
+        '200':
+          description: List of teams
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Team'
+  /teams/{teamId}/stats:
+    get:
+      summary: Get team stats
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team stats
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TeamStats'
+  /teams/{teamId}/roster:
+    get:
+      summary: Get team roster
+      parameters:
+        - in: path
+          name: teamId
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Team roster
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Player'
+  /predict:
+    post:
+      summary: Predict game outcome
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                gameId:
+                  type: string
+                teamA:
+                  type: string
+                teamB:
+                  type: string
+                date:
+                  type: string
+                  format: date
+      responses:
+        '200':
+          description: Prediction result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prediction'
+components:
+  schemas:
+    Game:
+      type: object
+      properties:
+        gameId:
+          type: string
+        date:
+          type: string
+          format: date
+        teams:
+          type: array
+          items:
+            $ref: '#/components/schemas/Team'
+        location:
+          type: string
+        status:
+          type: string
+    Team:
+      type: object
+      properties:
+        teamId:
+          type: string
+        name:
+          type: string
+        conference:
+          type: string
+        stats:
+          $ref: '#/components/schemas/TeamStats'
+        roster:
+          type: array
+          items:
+            $ref: '#/components/schemas/Player'
+    TeamStats:
+      type: object
+      properties:
+        season:
+          type: integer
+        ppg:
+          type: number
+        totalOffenseRank:
+          type: integer
+        passingYardsRank:
+          type: integer
+        rushingYardsRank:
+          type: integer
+        turnoversLost:
+          type: integer
+        ppgAllowed:
+          type: number
+        totalDefenseRank:
+          type: integer
+        passingYardsAllowedRank:
+          type: integer
+        rushingYardsAllowedRank:
+          type: integer
+        turnoversForced:
+          type: integer
+        turnoverMargin:
+          type: number
+    Player:
+      type: object
+      properties:
+        playerId:
+          type: string
+        name:
+          type: string
+        position:
+          type: string
+        dob:
+          type: string
+          format: date
+        depthChart:
+          type: string
+        snapsPerGame:
+          type: number
+    Prediction:
+      type: object
+      properties:
+        gameId:
+          type: string
+        predictedWinner:
+          type: string
+        winProbability:
+          type: number
+        margin:
+          type: number
+        breakdown:
+          $ref: '#/components/schemas/PredictionBreakdown'
+    PredictionBreakdown:
+      type: object
+      properties:
+        statsEdge:
+          type: number
+        biorhythmEdge:
+          type: number
+        homeFieldAdjustment:
+          type: number
+        explanation:
+          type: string

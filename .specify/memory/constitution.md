@@ -68,5 +68,5 @@ This project is a proof-of-concept (POC). Performance and security requirements 
 
 This constitution supersedes all other practices. Amendments require documentation, approval, and a migration plan if needed. All PRs and reviews must verify compliance with these principles. Complexity must be justified. Use the README and requirements.md for runtime development guidance.
 
-**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): Set original adoption date | **Last Amended**: 2025-12-22
-<!-- Version: 1.0.0 | Ratified: TODO(RATIFICATION_DATE) | Last Amended: 2025-12-22 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-22 | **Last Amended**: 2025-12-22
+<!-- Version: 1.0.0 | Ratified: 2025-12-22 | Last Amended: 2025-12-22 -->
