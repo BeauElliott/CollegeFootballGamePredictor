@@ -86,14 +86,14 @@ description: "Task list for NCAA Football Game Outcome Predictor implementation"
 **Independent Test**: Change config and verify predictions reflect new weights
 
 ### Tests for User Story 3
-- [ ] T027 [P] [US3] Write xUnit contract test for config endpoints in backend/tests/unit/ConfigTests.cs
-- [ ] T028 [P] [US3] Write integration test for config change flow in backend/tests/integration/ConfigIntegrationTests.cs
+- [x] T027 [P] [US3] Write xUnit contract test for config endpoints in backend/tests/unit/ConfigTests.cs
+- [x] T028 [P] [US3] Write integration test for config change flow in backend/tests/integration/ConfigIntegrationTests.cs
 
 ### Implementation for User Story 3
-- [ ] T029 [P] [US3] Implement config storage and update logic in backend/src/Processing/ConfigService.cs
-- [ ] T030 [US3] Implement config endpoints in backend/src/Api/Controllers/ConfigController.cs
-- [ ] T031 [US3] Add logging, error handling, and maintainability comments
-- [ ] T032 [US3] Add OpenAPI/Swagger docs for config endpoints
+- [x] T029 [P] [US3] Implement config storage and update logic in backend/src/Processing/ConfigService.cs
+- [x] T030 [US3] Implement config endpoints in backend/src/Api/Controllers/ConfigController.cs
+- [x] T031 [US3] Add logging, error handling, and maintainability comments
+- [x] T032 [US3] Add OpenAPI/Swagger docs for config endpoints
 
 **Checkpoint**: User Story 3 is fully functional and testable independently
 

@@ -44,6 +44,11 @@ public class ApplicationDbContext : DbContext
     /// </summary>
     public DbSet<PredictionBreakdown> PredictionBreakdowns { get; set; } = null!;
 
+    /// <summary>
+    /// Prediction configuration settings.
+    /// </summary>
+    public DbSet<PredictionConfigurationEntity> PredictionConfigurations { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

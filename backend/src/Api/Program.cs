@@ -28,11 +28,16 @@ builder.Services.AddScoped<DataRefreshService>();
 
 // Register prediction services
 builder.Services.AddScoped<BiorhythmService>();
+builder.Services.AddScoped<ConfigService>();
 builder.Services.AddScoped<PredictionService>(provider =>
 {
     var biorhythmService = provider.GetRequiredService<BiorhythmService>();
     var logger = provider.GetRequiredService<ILogger<PredictionService>>();
-    var config = new PredictionConfiguration(); // TODO: Load from configuration
+    var configService = provider.GetRequiredService<ConfigService>();
+    
+    // Load configuration from database (synchronously for now)
+    var config = configService.GetActiveConfigurationAsync().GetAwaiter().GetResult();
+    
     return new PredictionService(biorhythmService, logger, config);
 });
 
