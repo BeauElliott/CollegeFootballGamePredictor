@@ -1,6 +1,7 @@
 using Api.Middleware;
 using DataRetrieval.Configuration;
 using DataRetrieval.Data;
+using DataRetrieval.Services;
 using Microsoft.EntityFrameworkCore;
 using Processing.Models;
 using Processing.Services;
@@ -17,6 +18,13 @@ builder.Services.AddControllers();
 // Configure DataSources settings
 builder.Services.Configure<DataSourcesConfiguration>(
     builder.Configuration.GetSection(DataSourcesConfiguration.SectionName));
+
+// Register HTTP client for external data service
+builder.Services.AddHttpClient<ExternalDataService>();
+
+// Register data services
+builder.Services.AddScoped<ExternalDataService>();
+builder.Services.AddScoped<DataRefreshService>();
 
 // Register prediction services
 builder.Services.AddScoped<BiorhythmService>();
@@ -83,6 +91,9 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast");
 
 app.Run();
+
+// Make the implicit Program class accessible for integration tests
+public partial class Program { }
 
 record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {

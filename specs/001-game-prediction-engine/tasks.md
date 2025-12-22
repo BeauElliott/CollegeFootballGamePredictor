@@ -66,15 +66,15 @@ description: "Task list for NCAA Football Game Outcome Predictor implementation"
 **Independent Test**: Trigger data refresh and verify new data is available
 
 ### Tests for User Story 2
-- [ ] T020 [P] [US2] Write xUnit contract test for schedule/stats/roster refresh endpoints in backend/tests/unit/DataRefreshTests.cs
-- [ ] T021 [P] [US2] Write integration test for data refresh flow in backend/tests/integration/DataRefreshIntegrationTests.cs
+- [x] T020 [P] [US2] Write xUnit contract test for schedule/stats/roster refresh endpoints in backend/tests/unit/DataRefreshTests.cs
+- [x] T021 [P] [US2] Write integration test for data refresh flow in backend/tests/integration/DataRefreshIntegrationTests.cs
 
 ### Implementation for User Story 2
-- [ ] T022 [P] [US2] Implement schedule, stats, and roster data retrieval in backend/src/DataRetrieval/Services
-- [ ] T023 [US2] Implement refresh endpoints in backend/src/Api/Controllers/AdminController.cs
-- [ ] T024 [US2] Add logging and error handling for data refresh
-- [ ] T025 [US2] Add maintainability comments and XML docs to all new code
-- [ ] T026 [US2] Add OpenAPI/Swagger docs for refresh endpoints
+- [x] T022 [P] [US2] Implement schedule, stats, and roster data retrieval in backend/src/DataRetrieval/Services
+- [x] T023 [US2] Implement refresh endpoints in backend/src/Api/Controllers/AdminController.cs
+- [x] T024 [US2] Add logging and error handling for data refresh
+- [x] T025 [US2] Add maintainability comments and XML docs to all new code
+- [x] T026 [US2] Add OpenAPI/Swagger docs for refresh endpoints
 
 **Checkpoint**: User Story 2 is fully functional and testable independently
 
