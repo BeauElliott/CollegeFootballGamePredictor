@@ -1,50 +1,72 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+
+# CollegeFootballGamePredictor Constitution
+
+<!--
+Sync Impact Report
+------------------
+Version change: 0.0.0 → 1.0.0
+Modified principles: All (template → project-specific)
+Added sections: Explicit POC constraints, Documentation & Maintainability principle
+Removed sections: None
+Templates requiring updates:
+	✅ .specify/templates/plan-template.md (Constitution Check gates)
+	✅ .specify/templates/spec-template.md (spec-driven, testable requirements)
+	✅ .specify/templates/tasks-template.md (task types: TDD, doc, observability)
+Follow-up TODOs:
+	- TODO(RATIFICATION_DATE): Set original adoption date
+-->
+
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### I. Test-Driven Development (TDD)
+All code MUST be developed using TDD: tests are written before implementation, and code is only considered complete when all tests pass. The Red-Green-Refactor cycle is strictly enforced. No feature or bugfix is accepted without corresponding tests.
+Rationale: Ensures reliability, prevents regressions, and enables safe refactoring.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Specification as Authority
+Specifications are the single source of truth for requirements and acceptance criteria. Implementation MUST strictly follow the latest approved specification. No undocumented or ad-hoc features are permitted.
+Rationale: Prevents scope creep and ensures alignment with project goals.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### III. Clean Coding Standards
+All code MUST adhere to recognized clean code standards: clear naming, small functions, minimal side effects, and consistent formatting. Code reviews enforce these standards.
+Rationale: Improves readability, maintainability, and reduces onboarding time.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### IV. Explicit State Modeling
+All system state MUST be modeled explicitly and transparently. Hidden or implicit state is forbidden. State transitions must be clear and testable.
+Rationale: Reduces bugs and makes system behavior predictable.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+
+### V. Observability
+The system MUST provide sufficient observability: structured logging, error reporting, and traceability of key events. All critical operations must be auditable.
+Rationale: Enables debugging, monitoring, and root cause analysis.
+
+### VI. Documentation & Maintainability
+All code, features, and APIs MUST be thoroughly documented. Inline comments are required for complex logic. Documentation is a first-class deliverable and is reviewed alongside code. Maintainability is prioritized over premature optimization.
+Rationale: Ensures long-term project health and knowledge transfer.
+
+
+## Additional Constraints
+
+This project is a proof-of-concept (POC). Performance and security requirements are not enforced. However, all other principles (TDD, specification, clean code, explicit state, observability, documentation) are mandatory. Best practices for maintainability MUST be followed at all times.
+
+
+## Development Workflow
+
+1. All work begins with an approved specification.
+2. Tests are written before implementation (TDD).
+3. Code is implemented to pass all tests and meet the specification.
+4. Code reviews check for compliance with all principles, especially documentation and maintainability.
+5. Documentation is updated with every change.
+6. No code is merged without passing all tests and review gates.
+
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution supersedes all other practices. Amendments require documentation, approval, and a migration plan if needed. All PRs and reviews must verify compliance with these principles. Complexity must be justified. Use the README and requirements.md for runtime development guidance.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: TODO(RATIFICATION_DATE): Set original adoption date | **Last Amended**: 2025-12-22
+<!-- Version: 1.0.0 | Ratified: TODO(RATIFICATION_DATE) | Last Amended: 2025-12-22 -->

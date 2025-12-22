@@ -27,11 +27,18 @@
 **Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
 **Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
+
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- All code MUST be developed using TDD (tests before implementation; Red-Green-Refactor enforced).
+- Implementation MUST strictly follow the latest approved specification (spec as authority).
+- Code MUST adhere to clean coding standards (naming, formatting, small functions, minimal side effects).
+- All system state MUST be modeled explicitly; no hidden/implicit state.
+- System MUST provide observability (structured logging, error reporting, traceability).
+- All code/features/APIs MUST be thoroughly documented; maintainability prioritized.
+- POC: Performance/security constraints are not enforced, but maintainability and best practices are mandatory.
 
 ## Project Structure
 

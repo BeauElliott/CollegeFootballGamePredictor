@@ -5,7 +5,10 @@
 **Status**: Draft  
 **Input**: User description: "$ARGUMENTS"
 
+
 ## User Scenarios & Testing *(mandatory)*
+
+> All user stories and acceptance criteria MUST be independently testable and derived from the approved specification. Documentation and maintainability are required for all features. TDD is enforced for all implementation.
 
 <!--
   IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
