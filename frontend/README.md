@@ -1,6 +1,39 @@
-# Getting Started with Create React App
+# College Football Game Predictor - Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Modern React application for predicting college football game outcomes using statistical analysis and biorhythm calculations.
+
+## Features
+
+- **Game Selection**: Browse and select from upcoming scheduled games
+- **Prediction Engine**: Request predictions powered by statistical analysis and biorhythm data
+- **Detailed Breakdown**: View prediction factors including home field advantage, statistics edge, and biorhythm edge
+- **Modern UI**: Blue/green themed interface with responsive design for mobile and desktop
+- **Real-time Updates**: Live data from the backend API
+
+## Technology Stack
+
+- **React 19**: Latest React framework with hooks and functional components
+- **TypeScript**: Type-safe development with full typing support
+- **Jest & React Testing Library**: Comprehensive test coverage (26 tests)
+- **CSS Modules**: Component-scoped styling with modern CSS features
+- **Fetch API**: Native browser API for backend communication
+
+## Project Structure
+
+```
+frontend/
+├── src/
+│   ├── components/          # React components
+│   │   ├── ScheduleSelector.tsx
+│   │   ├── PredictionForm.tsx
+│   │   └── *.css            # Component styles
+│   ├── services/            # API service layer
+│   │   └── api.ts          # Backend API client
+│   ├── App.tsx             # Main application component
+│   ├── App.css             # Global app styles
+│   └── index.tsx           # Application entry point
+└── public/                  # Static assets
+```
 
 ## Available Scripts
 
@@ -13,6 +46,9 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 The page will reload if you make edits.\
 You will also see any lint errors in the console.
+
+**Environment Variables:**
+- `REACT_APP_API_URL`: Backend API URL (defaults to `http://localhost:5000`)
 
 ### `npm test`
 
@@ -44,3 +80,51 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+## Component Documentation
+
+### ScheduleSelector
+
+Displays upcoming college football games and allows user selection.
+
+**Features:**
+- Fetches upcoming games from backend API
+- Displays game matchups with team names, dates, and locations
+- Highlights selected game
+- Handles loading and error states
+- Responsive mobile design
+
+### PredictionForm
+
+Handles prediction requests and displays results.
+
+**Features:**
+- Shows selected game details
+- Submits prediction requests
+- Displays win probability and margin
+- Shows detailed prediction breakdown
+- Animated result display
+
+### API Service
+
+Type-safe API client for backend communication.
+
+**Key Methods:**
+- `getUpcomingGames()`, `getGame(gameId)`, `getSchedule()`
+- `getTeams()`, `getTeamStats()`, `getTeamRoster()`
+- `predictGame(request)`, `getGamePredictions()`
+
+## Development Guidelines
+
+- Functional components with React hooks
+- TypeScript with strict typing
+- Comprehensive JSDoc documentation
+- BEM-like CSS naming
+- Mobile-first responsive design
+- Full test coverage with Jest and React Testing Library
+
+## Deployment
+
+Build for production: `npm run build`
+Deploy the `build/` folder to any static hosting service.
+Set `REACT_APP_API_URL` environment variable to your backend URL.
