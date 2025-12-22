@@ -2,6 +2,8 @@ using Api.Middleware;
 using DataRetrieval.Configuration;
 using DataRetrieval.Data;
 using Microsoft.EntityFrameworkCore;
+using Processing.Models;
+using Processing.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,16 @@ builder.Services.AddControllers();
 // Configure DataSources settings
 builder.Services.Configure<DataSourcesConfiguration>(
     builder.Configuration.GetSection(DataSourcesConfiguration.SectionName));
+
+// Register prediction services
+builder.Services.AddScoped<BiorhythmService>();
+builder.Services.AddScoped<PredictionService>(provider =>
+{
+    var biorhythmService = provider.GetRequiredService<BiorhythmService>();
+    var logger = provider.GetRequiredService<ILogger<PredictionService>>();
+    var config = new PredictionConfiguration(); // TODO: Load from configuration
+    return new PredictionService(biorhythmService, logger, config);
+});
 
 // Add CORS
 builder.Services.AddCors(options =>

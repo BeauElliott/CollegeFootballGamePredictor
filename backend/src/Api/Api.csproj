@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataRetrieval\DataRetrieval.csproj" />
+    <ProjectReference Include="..\Processing\Processing.csproj" />
   </ItemGroup>
 
 </Project>

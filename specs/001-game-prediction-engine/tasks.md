@@ -45,16 +45,16 @@ description: "Task list for NCAA Football Game Outcome Predictor implementation"
 **Independent Test**: Submit a prediction request and verify response structure and content
 
 ### Tests for User Story 1
-- [ ] T012 [P] [US1] Write xUnit contract test for POST /predict in backend/tests/unit/PredictionTests.cs
-- [ ] T013 [P] [US1] Write integration test for prediction flow in backend/tests/integration/PredictionIntegrationTests.cs
+- [x] T014 [P] [US1] Write xUnit contract test for POST /predict in backend/tests/unit/PredictionServiceTests.cs
+- [ ] T015 [P] [US1] Write integration test for prediction flow in backend/tests/integration/PredictionIntegrationTests.cs
 
 ### Implementation for User Story 1
-- [ ] T014 [P] [US1] Implement Prediction, Game, Team, Player models in backend/src/DataRetrieval/Entities
-- [ ] T015 [P] [US1] Implement PredictionService in backend/src/Processing/PredictionService.cs
-- [ ] T016 [US1] Implement POST /predict endpoint in backend/src/Api/Controllers/PredictionController.cs
-- [ ] T017 [US1] Add logging and error handling for prediction requests
-- [ ] T018 [US1] Add XML doc comments and maintainability comments to all new backend code
-- [ ] T019 [US1] Add OpenAPI/Swagger docs for /predict endpoint
+- [x] T016 [P] [US1] Implement Prediction, Game, Team, Player models in backend/src/DataRetrieval/Entities
+- [x] T017 [P] [US1] Implement PredictionService in backend/src/Processing/PredictionService.cs
+- [x] T018 [US1] Implement POST /predict endpoint in backend/src/Api/Controllers/PredictionController.cs
+- [x] T019 [US1] Add logging and error handling for prediction requests
+- [x] T020 [US1] Add XML doc comments and maintainability comments to all new backend code
+- [x] T021 [US1] Add OpenAPI/Swagger docs for /predict endpoint
 
 **Checkpoint**: User Story 1 is fully functional and testable independently
 
