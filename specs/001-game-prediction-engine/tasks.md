@@ -160,11 +160,11 @@ description: "Task list for NCAA Football Game Outcome Predictor implementation"
 
 ## Final Phase: Polish & Cross-Cutting Concerns
 
-- [ ] T043 [P] Add full project documentation and update README.md, quickstart.md, and OpenAPI docs
-- [ ] T044 [P] Add CI/CD pipeline config for build, test, and container image publish
-- [ ] T045 [P] Add devcontainer.json and Dockerfile refinements for developer experience
-- [ ] T046 [P] Add code linting, formatting, and static analysis for backend and frontend
-- [ ] T047 [P] Review for constitution compliance and update compliance-checklist.md
+- [x] T043 [P] Add full project documentation and update README.md, quickstart.md, and OpenAPI docs
+- [x] T044 [P] Add CI/CD pipeline config for build, test, and container image publish
+- [x] T045 [P] Add devcontainer.json and Dockerfile refinements for developer experience
+- [x] T046 [P] Add code linting, formatting, and static analysis for backend and frontend
+- [x] T047 [P] Review for constitution compliance and update compliance-checklist.md
 
 ---
 

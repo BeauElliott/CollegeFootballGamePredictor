@@ -2,13 +2,21 @@ openapi: 3.0.3
 info:
   title: NCAA Football Game Outcome Predictor API
   version: 1.0.0
-  description: Core API for schedule, teams, rosters, and predictions
+  description: |
+    Complete API for NCAA Football Game Outcome Predictor. 
+    Provides schedule data, team information, player rosters, predictions, 
+    administrative functions, and configuration management.
 servers:
   - url: http://localhost:5000/api
+    description: Development server
 paths:
-  /schedule/upcoming:
+  # Core Data Endpoints
+  /coredata/schedule/upcoming:
     get:
+      tags:
+        - Core Data
       summary: List upcoming games
+      description: Returns games scheduled in the next 30 days
       responses:
         '200':
           description: List of upcoming games
@@ -18,15 +26,56 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Game'
-  /schedule/{gameId}:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /coredata/schedule:
     get:
+      tags:
+        - Core Data
+      summary: Get full game schedule
+      description: Returns all games with optional filtering
+      parameters:
+        - in: query
+          name: season
+          schema:
+            type: integer
+          description: Filter by season year
+        - in: query
+          name: week
+          schema:
+            type: integer
+          description: Filter by week number
+        - in: query
+          name: teamId
+          schema:
+            type: string
+          description: Filter by team ID
+      responses:
+        '200':
+          description: List of games
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Game'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /coredata/schedule/{gameId}:
+    get:
+      tags:
+        - Core Data
       summary: Get detailed game info
+      description: Returns comprehensive details for a specific game
       parameters:
         - in: path
           name: gameId
           required: true
           schema:
             type: string
+          description: Unique game identifier
       responses:
         '200':
           description: Game details
@@ -34,9 +83,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Game'
-  /teams:
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /coredata/schedule/{gameId}/predictions:
     get:
-      summary: List teams
+      tags:
+        - Core Data
+      summary: Get predictions for a specific game
+      description: Returns all prediction history for the specified game
+      parameters:
+        - in: path
+          name: gameId
+          required: true
+          schema:
+            type: string
+          description: Unique game identifier
+      responses:
+        '200':
+          description: List of predictions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Prediction'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /coredata/teams:
+    get:
+      tags:
+        - Core Data
+      summary: List all teams
+      description: Returns all FBS teams
       responses:
         '200':
           description: List of teams
@@ -46,31 +130,52 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Team'
-  /teams/{teamId}/stats:
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /coredata/teams/{teamId}/stats:
     get:
-      summary: Get team stats
+      tags:
+        - Core Data
+      summary: Get team statistics
+      description: Returns season statistics for a specific team
       parameters:
         - in: path
           name: teamId
           required: true
           schema:
             type: string
+          description: Unique team identifier
+        - in: query
+          name: season
+          schema:
+            type: integer
+          description: Season year (defaults to current)
       responses:
         '200':
-          description: Team stats
+          description: Team statistics
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/TeamStats'
-  /teams/{teamId}/roster:
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /coredata/teams/{teamId}/roster:
     get:
+      tags:
+        - Core Data
       summary: Get team roster
+      description: Returns current player roster for a specific team
       parameters:
         - in: path
           name: teamId
           required: true
           schema:
             type: string
+          description: Unique team identifier
       responses:
         '200':
           description: Team roster
@@ -80,25 +185,26 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Player'
-  /predict:
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  # Prediction Endpoint
+  /prediction/predict:
     post:
+      tags:
+        - Prediction
       summary: Predict game outcome
+      description: |
+        Generate a prediction for a specific game using the active configuration.
+        Incorporates team statistics and biorhythm data.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                gameId:
-                  type: string
-                teamA:
-                  type: string
-                teamB:
-                  type: string
-                date:
-                  type: string
-                  format: date
+              $ref: '#/components/schemas/PredictionRequest'
       responses:
         '200':
           description: Prediction result
@@ -106,103 +212,664 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Prediction'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  # Admin Endpoints
+  /admin/refresh/all:
+    post:
+      tags:
+        - Admin
+      summary: Refresh all data
+      description: Triggers data refresh for teams, schedule, stats, and rosters
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Refresh initiated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /admin/refresh/teams:
+    post:
+      tags:
+        - Admin
+      summary: Refresh team data
+      description: Updates team roster from external data sources
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: Team data refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  teamsUpdated:
+                    type: integer
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /admin/refresh/schedule:
+    post:
+      tags:
+        - Admin
+      summary: Refresh schedule data
+      description: Updates game schedule from external data sources
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: season
+          schema:
+            type: integer
+          description: Season year to refresh
+      responses:
+        '200':
+          description: Schedule refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gamesUpdated:
+                    type: integer
+                  season:
+                    type: integer
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /admin/refresh/stats:
+    post:
+      tags:
+        - Admin
+      summary: Refresh team statistics
+      description: Updates team statistical data from external sources
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: season
+          schema:
+            type: integer
+          description: Season year to refresh
+      responses:
+        '200':
+          description: Stats refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statsUpdated:
+                    type: integer
+                  season:
+                    type: integer
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /admin/refresh/roster:
+    post:
+      tags:
+        - Admin
+      summary: Refresh team roster
+      description: Updates player roster data from external sources
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: query
+          name: teamId
+          schema:
+            type: string
+          description: Specific team to refresh (optional)
+      responses:
+        '200':
+          description: Roster refreshed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  playersUpdated:
+                    type: integer
+                  teamId:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  # Configuration Endpoints
+  /config/active:
+    get:
+      tags:
+        - Configuration
+      summary: Get active prediction configuration
+      description: Returns the currently active prediction configuration
+      responses:
+        '200':
+          description: Active configuration
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionConfiguration'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    put:
+      tags:
+        - Configuration
+      summary: Create or update active configuration
+      description: Creates a new prediction configuration and sets it as active
+      security:
+        - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PredictionConfigurationInput'
+      responses:
+        '200':
+          description: Configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionConfiguration'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /config:
+    get:
+      tags:
+        - Configuration
+      summary: List all prediction configurations
+      description: Returns all saved prediction configurations
+      security:
+        - ApiKeyAuth: []
+      responses:
+        '200':
+          description: List of configurations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PredictionConfiguration'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /config/{id}:
+    get:
+      tags:
+        - Configuration
+      summary: Get specific configuration
+      description: Returns a specific prediction configuration by ID
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Configuration ID
+      responses:
+        '200':
+          description: Configuration details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionConfiguration'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    
+    delete:
+      tags:
+        - Configuration
+      summary: Delete a configuration
+      description: Deletes a specific prediction configuration (cannot delete active config)
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Configuration ID
+      responses:
+        '204':
+          description: Configuration deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  /config/{id}/activate:
+    post:
+      tags:
+        - Configuration
+      summary: Activate a configuration
+      description: Sets a specific configuration as the active one for predictions
+      security:
+        - ApiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: Configuration ID
+      responses:
+        '200':
+          description: Configuration activated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PredictionConfiguration'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  
+  # Health Endpoint
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check
+      description: Returns API health status and database connectivity
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  database:
+                    type: string
+                    example: Connected
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Unhealthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  errors:
+                    type: array
+                    items:
+                      type: string
+
 components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  
+  responses:
+    BadRequest:
+      description: Invalid request parameters
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              details:
+                type: array
+                items:
+                  type: string
+    
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Resource not found
+    
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+              message:
+                type: string
+  
   schemas:
     Game:
       type: object
+      required:
+        - gameId
+        - date
+        - homeTeamId
+        - awayTeamId
+        - status
       properties:
         gameId:
           type: string
+          description: Unique game identifier
         date:
           type: string
-          format: date
-        teams:
-          type: array
-          items:
-            $ref: '#/components/schemas/Team'
-        location:
+          format: date-time
+          description: Game date and time
+        homeTeamId:
           type: string
+          description: Home team identifier
+        awayTeamId:
+          type: string
+          description: Away team identifier
         status:
           type: string
+          enum: [Scheduled, InProgress, Completed, Postponed, Cancelled]
+          description: Current game status
+        homeScore:
+          type: integer
+          nullable: true
+          description: Home team final score
+        awayScore:
+          type: integer
+          nullable: true
+          description: Away team final score
+        venue:
+          type: string
+          nullable: true
+          description: Game venue/location
+    
     Team:
       type: object
+      required:
+        - teamId
+        - name
       properties:
         teamId:
           type: string
+          description: Unique team identifier
         name:
           type: string
+          description: Official team name
         conference:
           type: string
-        stats:
-          $ref: '#/components/schemas/TeamStats'
-        roster:
-          type: array
-          items:
-            $ref: '#/components/schemas/Player'
+          nullable: true
+          description: Conference affiliation
+        mascot:
+          type: string
+          nullable: true
+          description: Team mascot
+    
     TeamStats:
       type: object
+      required:
+        - id
+        - teamId
+        - season
       properties:
+        id:
+          type: integer
+          description: Stats record ID
+        teamId:
+          type: string
+          description: Team identifier
         season:
           type: integer
+          description: Season year
         ppg:
           type: number
+          format: double
+          nullable: true
+          description: Points per game (offensive)
         totalOffenseRank:
           type: integer
+          nullable: true
+          description: National rank for total offense
         passingYardsRank:
           type: integer
+          nullable: true
+          description: National rank for passing yards
         rushingYardsRank:
           type: integer
+          nullable: true
+          description: National rank for rushing yards
         turnoversLost:
           type: integer
+          nullable: true
+          description: Turnovers lost
         ppgAllowed:
           type: number
+          format: double
+          nullable: true
+          description: Points per game allowed (defensive)
         totalDefenseRank:
           type: integer
+          nullable: true
+          description: National rank for total defense
         passingYardsAllowedRank:
           type: integer
+          nullable: true
+          description: National rank for passing yards allowed
         rushingYardsAllowedRank:
           type: integer
+          nullable: true
+          description: National rank for rushing yards allowed
         turnoversForced:
           type: integer
+          nullable: true
+          description: Turnovers forced
         turnoverMargin:
           type: number
+          format: double
+          nullable: true
+          description: Turnover margin (forced - lost)
+    
     Player:
       type: object
+      required:
+        - playerId
+        - teamId
+        - name
+        - position
       properties:
         playerId:
           type: string
+          description: Unique player identifier
+        teamId:
+          type: string
+          description: Team identifier
         name:
           type: string
+          description: Player full name
         position:
           type: string
-        dob:
+          description: Position (QB, RB, WR, etc.)
+        dateOfBirth:
           type: string
           format: date
+          nullable: true
+          description: Player date of birth
         depthChart:
           type: string
+          nullable: true
+          description: Depth chart position (1st string, 2nd string, etc.)
         snapsPerGame:
           type: number
-    Prediction:
+          format: double
+          nullable: true
+          description: Average snaps per game
+    
+    PredictionRequest:
       type: object
+      required:
+        - gameId
       properties:
         gameId:
           type: string
-        predictedWinner:
+          description: Game identifier to predict
+    
+    Prediction:
+      type: object
+      required:
+        - id
+        - gameId
+        - predictedWinnerId
+        - winProbability
+        - createdAt
+      properties:
+        id:
+          type: integer
+          description: Prediction record ID
+        gameId:
           type: string
+          description: Game identifier
+        predictedWinnerId:
+          type: string
+          description: Predicted winner team ID
         winProbability:
           type: number
+          format: double
+          description: Win probability (0.0 to 1.0)
+          minimum: 0
+          maximum: 1
         margin:
           type: number
+          format: double
+          nullable: true
+          description: Predicted point margin
         breakdown:
-          $ref: '#/components/schemas/PredictionBreakdown'
+          type: string
+          nullable: true
+          description: JSON breakdown of prediction factors
+        createdAt:
+          type: string
+          format: date-time
+          description: Prediction timestamp
+    
+    PredictionConfiguration:
+      type: object
+      required:
+        - id
+        - version
+        - isActive
+        - createdAt
+      properties:
+        id:
+          type: integer
+          description: Configuration ID
+        version:
+          type: string
+          description: Configuration version identifier
+        positionImportance:
+          type: string
+          description: JSON object with position weights (QB, RB, WR, etc.)
+        isActive:
+          type: boolean
+          description: Whether this is the active configuration
+        createdAt:
+          type: string
+          format: date-time
+          description: Configuration creation timestamp
+        activatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: When configuration was activated
+    
+    PredictionConfigurationInput:
+      type: object
+      required:
+        - version
+        - positionImportance
+      properties:
+        version:
+          type: string
+          description: Version identifier for this configuration
+        positionImportance:
+          type: object
+          description: Position weights (QB, RB, WR, TE, OL, DL, LB, DB)
+          additionalProperties:
+            type: number
+            format: double
+          example:
+            QB: 0.3
+            RB: 0.15
+            WR: 0.15
+            TE: 0.05
+            OL: 0.1
+            DL: 0.1
+            LB: 0.08
+            DB: 0.07
+    
     PredictionBreakdown:
       type: object
       properties:
         statsEdge:
           type: number
+          format: double
+          description: Statistical advantage component
         biorhythmEdge:
           type: number
+          format: double
+          description: Biorhythm advantage component
         homeFieldAdjustment:
           type: number
+          format: double
+          description: Home field advantage adjustment
         explanation:
           type: string
+          description: Human-readable explanation of the prediction

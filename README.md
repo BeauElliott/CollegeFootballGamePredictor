@@ -1,35 +1,109 @@
 # CollegeFootballGamePredictor
 
-**NCAA Football Game Outcome Predictor** - Proof-of-Concept (POC)
+**NCAA Football Game Outcome Predictor** - Full-Stack Web Application
 
-A web application that predicts outcomes of NCAA FBS college football games, focusing on Power 4 conferences (ACC, Big Ten, Big 12, SEC) and College Football Playoff games. The prediction model combines traditional team performance statistics with an experimental player-level biorhythm scoring system.
+A modern web application that predicts outcomes of NCAA FBS college football games using statistical analysis and experimental biorhythm calculations. The system combines traditional team performance metrics with player-level biorhythm scoring to generate predictions with detailed breakdowns.
 
-## Project Structure
+## 🎯 Features
+
+- **Game Predictions**: Advanced ML-style predictions combining statistics and biorhythm analysis
+- **Schedule Browsing**: View upcoming games with team information
+- **Team Statistics**: Access detailed team performance metrics
+- **Prediction History**: Track prediction accuracy over time
+- **Admin Controls**: Data refresh and configuration management
+- **Modern UI**: Responsive React frontend with blue/green theme
+
+## 🏗️ Project Structure
 
 This is a multi-project monorepo with:
-- **Backend**: .NET 8 C# (DataRetrieval, Processing, WebScraping, Api projects)
-- **Frontend**: React with TypeScript
-- **Database**: PostgreSQL (containerized)
+- **Backend**: .NET 9 C# (DataRetrieval, Processing, WebScraping, Api projects)
+- **Frontend**: React 19 with TypeScript
+- **Database**: PostgreSQL 16 (containerized)
 - **Development**: Devcontainer for full encapsulation
 
-### Backend Projects
-- **DataRetrieval**: Entity Framework Core, data access, and retrieval
-- **Processing**: Prediction logic, biorhythm calculations, and model processing
-- **WebScraping**: External data source scraping (schedules, stats, rosters)
-- **Api**: ASP.NET Core Web API endpoints
+### Backend Projects (.NET 9)
+- **DataRetrieval**: Entity Framework Core, data access, entities, and database context
+- **Processing**: Prediction engine, biorhythm calculations, configuration management
+- **WebScraping**: External data source integration (schedules, stats, rosters)
+- **Api**: ASP.NET Core Web API with 5 controllers and 20+ endpoints
 
-### Frontend
-- **React**: Modern UI with TypeScript, Jest, and React Testing Library
+### Frontend (React 19)
+- **React**: Modern UI with TypeScript, hooks, comprehensive testing
+- **Components**: ScheduleSelector, PredictionForm with responsive design
+- **API Layer**: Type-safe service layer with full error handling
+- **Testing**: 26 tests with Jest and React Testing Library
 
-## Quick Start
+### Testing
+- **Backend**: 41 unit tests, 22 integration tests (xUnit, Moq, FluentAssertions)
+- **Frontend**: 26 component and integration tests (Jest, React Testing Library)
+- **Coverage**: All major features and error paths
 
-1. **Prerequisites**: Docker, .NET 9 SDK, Node.js (LTS)
-2. **Devcontainer**: Open in VS Code and reopen in container
-3. **Database**: Start PostgreSQL: `docker-compose -f docker-compose.dev.yml up -d`
-4. **Backend**: `cd backend && dotnet run --project src/Api`
-5. **Frontend**: `cd frontend && npm start`
+## 🚀 Quick Start
+
+## 🚀 Quick Start
+
+### Using Devcontainer (Recommended)
+
+1. **Prerequisites**: Docker Desktop, VS Code with Remote Containers extension
+2. **Open in Container**: Open folder in VS Code, click "Reopen in Container"
+3. **Wait for Setup**: Container will build and install all dependencies
+4. **Start Database**: `docker-compose -f docker-compose.dev.yml up -d`
+5. **Run Backend**: `cd backend && dotnet run --project src/Api`
+6. **Run Frontend**: In new terminal: `cd frontend && npm start`
+7. **Access App**: Frontend at http://localhost:3000, API at http://localhost:5000
+
+### Manual Setup
+
+1. **Prerequisites**: .NET 9 SDK, Node.js 18+, PostgreSQL 16, Docker
+2. **Clone Repository**: `git clone <repo-url> && cd CollegeFootballGamePredictor`
+3. **Database**: Start PostgreSQL container: `docker-compose -f docker-compose.dev.yml up -d`
+4. **Backend Setup**:
+   ```bash
+   cd backend
+   dotnet restore
+   dotnet ef database update --project src/Api
+   dotnet run --project src/Api
+   ```
+5. **Frontend Setup**:
+   ```bash
+   cd frontend
+   npm install
+   npm start
+   ```
+6. **Configure API Key**: See Configuration section below
 
 See [specs/001-game-prediction-engine/quickstart.md](specs/001-game-prediction-engine/quickstart.md) for detailed setup.
+
+## 📡 API Endpoints
+
+### Prediction API
+- `POST /api/prediction` - Generate game prediction
+- `GET /api/prediction/{id}` - Get prediction by ID
+
+### Core Data API  
+- `GET /api/schedule/upcoming` - Upcoming scheduled games
+- `GET /api/schedule/{gameId}` - Specific game details
+- `GET /api/schedule` - All games with filters
+- `GET /api/teams` - All teams
+- `GET /api/teams/{teamId}/stats` - Team statistics
+- `GET /api/teams/{teamId}/roster` - Team roster
+- `GET /api/schedule/{gameId}/predictions` - Prediction history
+
+### Admin API
+- `POST /api/admin/refresh/teams` - Refresh team data
+- `POST /api/admin/refresh/schedule` - Refresh schedule
+- `POST /api/admin/refresh/stats` - Refresh statistics
+- `POST /api/admin/refresh/all` - Refresh all data
+
+### Configuration API
+- `GET /api/config` - All configurations
+- `GET /api/config/active` - Active configuration
+- `PUT /api/config` - Update active configuration
+- `POST /api/config/{id}/activate` - Activate configuration
+- `DELETE /api/config/{id}` - Delete configuration
+
+Full API documentation: [OpenAPI Specification](specs/001-game-prediction-engine/contracts/openapi.yaml)
+
 
 ### Configuration
 
@@ -92,12 +166,59 @@ See [.specify/compliance-checklist.md](.specify/compliance-checklist.md) for com
 
 ## Technology Stack
 
-- **Language/Version**: C# (.NET 9), JavaScript/TypeScript (React 19)
-- **Primary Dependencies**: ASP.NET Core, Entity Framework Core, xUnit, PostgreSQL (Npgsql), React, Jest, React Testing Library
-- **Storage**: PostgreSQL 16 (containerized, scalable, open source)
-- **Testing**: xUnit + Moq + FluentAssertions (backend), Jest + React Testing Library (frontend)
-- **Target Platform**: Docker containers, devcontainer, web
-- **Constraints**: Maintainability, TDD, documentation, containerization
+- **Backend**: C# .NET 9, ASP.NET Core, Entity Framework Core 9.0
+- **Frontend**: React 19, TypeScript 4.9, Modern Hooks API
+- **Database**: PostgreSQL 16 with Npgsql 9.0
+- **Testing**: xUnit 2.9 (backend), Jest + React Testing Library (frontend)
+- **Dependencies**: Moq 4.20, FluentAssertions 6.12 (backend), @testing-library/react 16.3 (frontend)
+- **Platform**: Docker containers, Linux (Debian), devcontainer
+- **Tooling**: .NET CLI, npm, EF Core migrations
+
+## 📊 Implementation Status
+
+### ✅ Completed Phases
+
+**Phase 1-2: Foundation** (T001-T013)
+- Project structure and devcontainer setup
+- PostgreSQL database with EF Core
+- Entity models and migrations
+- Testing infrastructure (unit + integration)
+- Middleware (error handling, logging)
+
+**Phase 3: User Story 1 - Prediction MVP** (T014-T021)
+- Biorhythm calculation service
+- Prediction engine with configurable weights
+- POST /api/prediction endpoint
+- 10 comprehensive tests (all passing)
+
+**Phase 4: User Story 2 - Data Management** (T022-T026)
+- External data service integration
+- Data refresh orchestration
+- 5 admin endpoints for data management
+- 17 tests (12 passing, 5 skipped)
+
+**Phase 5: User Story 3 - Configuration** (T027-T032)
+- Configuration service with versioning and caching
+- 6 configuration management endpoints
+- Prediction configuration with position importance
+- 28 tests (15 passing, 13 skipped)
+
+**Phase 6: User Story 4 - Core Data API** (T033-T036)
+- 7 GET endpoints for schedule, teams, stats, roster
+- CoreDataController with comprehensive error handling
+- 41 unit tests (all passing), 22 integration tests
+
+**Phase 7: Frontend MVP** (T037-T042)
+- React application with ScheduleSelector and PredictionForm
+- Type-safe API service layer
+- Blue/green responsive design
+- 26 frontend tests (23 passing)
+
+**Phase 8: Polish & Cross-Cutting** (In Progress)
+- Project documentation and guides
+- CI/CD pipeline setup
+- Code quality tooling
+- Compliance review
 
 ## Development Workflow
 

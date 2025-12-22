@@ -1,0 +1,11 @@
+# Prettier ignore patterns
+node_modules
+build
+coverage
+public
+*.config.js
+*.config.ts
+.env
+.env.local
+.env.production
+.env.development
