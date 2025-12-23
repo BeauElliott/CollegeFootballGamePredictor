@@ -162,14 +162,14 @@ export const api = {
    * Fetches all upcoming scheduled games
    */
   async getUpcomingGames(): Promise<Game[]> {
-    return apiRequest<Game[]>('/api/schedule/upcoming');
+    return apiRequest<Game[]>('/api/coredata/schedule/upcoming');
   },
 
   /**
    * Fetches a specific game by ID
    */
   async getGame(gameId: string): Promise<Game> {
-    return apiRequest<Game>(`/api/schedule/${gameId}`);
+    return apiRequest<Game>(`/api/coredata/schedule/${gameId}`);
   },
 
   /**
@@ -181,7 +181,7 @@ export const api = {
     if (status) params.append('status', status);
     
     const query = params.toString();
-    return apiRequest<Game[]>(`/api/schedule${query ? `?${query}` : ''}`);
+    return apiRequest<Game[]>(`/api/coredata/schedule${query ? `?${query}` : ''}`);
   },
 
   /**
@@ -189,14 +189,14 @@ export const api = {
    */
   async getTeams(conference?: string): Promise<Team[]> {
     const params = conference ? `?conference=${conference}` : '';
-    return apiRequest<Team[]>(`/api/teams${params}`);
+    return apiRequest<Team[]>(`/api/coredata/teams${params}`);
   },
 
   /**
    * Fetches team statistics for a specific team
    */
   async getTeamStats(teamId: string): Promise<TeamStats[]> {
-    return apiRequest<TeamStats[]>(`/api/teams/${teamId}/stats`);
+    return apiRequest<TeamStats[]>(`/api/coredata/teams/${teamId}/stats`);
   },
 
   /**
@@ -204,14 +204,14 @@ export const api = {
    */
   async getTeamRoster(teamId: string, position?: string): Promise<Player[]> {
     const params = position ? `?position=${position}` : '';
-    return apiRequest<Player[]>(`/api/teams/${teamId}/roster${params}`);
+    return apiRequest<Player[]>(`/api/coredata/teams/${teamId}/roster${params}`);
   },
 
   /**
    * Fetches prediction history for a specific game
    */
   async getGamePredictions(gameId: string): Promise<PredictionResponse[]> {
-    return apiRequest<PredictionResponse[]>(`/api/schedule/${gameId}/predictions`);
+    return apiRequest<PredictionResponse[]>(`/api/coredata/schedule/${gameId}/predictions`);
   },
 
   /**

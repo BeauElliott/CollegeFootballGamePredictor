@@ -96,8 +96,16 @@ public class DataRefreshService
                 var gameId = $"game-{extGame.Id}";
                 var existingGame = await _context.Games.FindAsync(gameId);
 
-                var homeTeamId = $"team-{extGame.HomeTeam}";
-                var awayTeamId = $"team-{extGame.AwayTeam}";
+                var homeTeamId = await GetTeamIdByNameAsync(extGame.HomeTeam);
+                var awayTeamId = await GetTeamIdByNameAsync(extGame.AwayTeam);
+
+                // Skip this game if we can't find the teams
+                if (homeTeamId == null || awayTeamId == null)
+                {
+                    _logger.LogWarning("Skipping game {GameId}: Could not find team IDs for {HomeTeam} vs {AwayTeam}", 
+                        gameId, extGame.HomeTeam, extGame.AwayTeam);
+                    continue;
+                }
 
                 if (existingGame != null)
                 {
@@ -326,6 +334,20 @@ public class DataRefreshService
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Helper method to find team ID by team name.
+    /// </summary>
+    private async Task<string?> GetTeamIdByNameAsync(string teamName)
+    {
+        if (string.IsNullOrEmpty(teamName))
+            return null;
+
+        var team = await _context.Teams
+            .FirstOrDefaultAsync(t => t.Name == teamName);
+
+        return team?.TeamId;
     }
 }
 

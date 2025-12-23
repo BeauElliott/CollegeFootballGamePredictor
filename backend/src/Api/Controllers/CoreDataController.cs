@@ -10,7 +10,7 @@ namespace Api.Controllers;
 /// Provides read-only access to schedule, teams, statistics, and roster information.
 /// </summary>
 [ApiController]
-[Route("api")]
+[Route("api/coredata")]
 public class CoreDataController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
@@ -42,8 +42,6 @@ public class CoreDataController : ControllerBase
             var games = await _context.Games
                 .Where(g => g.Status == GameStatus.Scheduled && g.Date > DateTime.UtcNow)
                 .OrderBy(g => g.Date)
-                .Include(g => g.HomeTeam)
-                .Include(g => g.AwayTeam)
                 .Take(limit)
                 .ToListAsync();
 
@@ -76,8 +74,6 @@ public class CoreDataController : ControllerBase
             _logger.LogInformation("Getting game {GameId}", gameId);
 
             var game = await _context.Games
-                .Include(g => g.HomeTeam)
-                .Include(g => g.AwayTeam)
                 .FirstOrDefaultAsync(g => g.GameId == gameId);
 
             if (game == null)
@@ -255,8 +251,6 @@ public class CoreDataController : ControllerBase
                 teamId, status);
 
             var query = _context.Games
-                .Include(g => g.HomeTeam)
-                .Include(g => g.AwayTeam)
                 .AsQueryable();
 
             if (!string.IsNullOrEmpty(teamId))
