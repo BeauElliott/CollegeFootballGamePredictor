@@ -1,0 +1,173 @@
+/* ScheduleSelector component styles */
+
+.schedule-selector {
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.schedule-selector h2 {
+  color: #1e3a8a;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.games-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.game-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.game-card:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+  transform: translateY(-2px);
+}
+
+.game-card.selected {
+  border-color: #10b981;
+  background: #f0fdf4;
+  box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3);
+}
+
+.game-card:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.game-teams {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.team {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.team-label {
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.team-name {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.home-team {
+  align-items: flex-end;
+}
+
+.vs {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #9ca3af;
+  margin: 0 1rem;
+}
+
+.game-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.game-date {
+  font-size: 0.875rem;
+  color: #4b5563;
+  font-weight: 500;
+}
+
+.game-location {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.loading,
+.error,
+.no-games {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  background: white;
+  border-radius: 0.75rem;
+  border: 2px dashed #e5e7eb;
+}
+
+.loading {
+  color: #3b82f6;
+  font-size: 1.125rem;
+}
+
+.error {
+  color: #dc2626;
+}
+
+.error p {
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.error button {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.error button:hover {
+  background: #2563eb;
+}
+
+.no-games {
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+  .game-teams {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .team {
+    width: 100%;
+    align-items: center !important;
+  }
+
+  .vs {
+    margin: 0.5rem 0;
+    font-size: 1.25rem;
+  }
+
+  .game-details {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+}

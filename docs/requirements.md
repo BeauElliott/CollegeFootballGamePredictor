@@ -1,8 +1,6 @@
 # NCAA Football Game Outcome Predictor – Requirements Specification
 
 **Project Name:** NCAA Football Predictor  
-**Technology Stack:** .NET 8 (or latest), C#, ASP.NET Core Web API (backend), optionally Blazor or minimal frontend for demo  
-**Target Platform:** Web application (API-first, with optional simple UI)  
 **Version:** 1.0  
 **Date:** December 22, 2025  
 
@@ -118,5 +116,3 @@ The prediction model combines two primary components:
 - Recruiting rankings or talent composite integration
 - Injury status integration
 - Live in-game prediction updates
-
-## 6. Suggested Project Structure (.NET)

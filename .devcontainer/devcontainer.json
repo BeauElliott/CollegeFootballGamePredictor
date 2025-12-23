@@ -1,0 +1,156 @@
+{
+  "name": "NCAA Football Predictor Dev Container",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  
+  "forwardPorts": [5000, 3000, 5432],
+  "portsAttributes": {
+    "5000": {
+      "label": "Backend API",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Frontend",
+      "onAutoForward": "openBrowser"
+    },
+    "5432": {
+      "label": "PostgreSQL",
+      "onAutoForward": "silent"
+    }
+  },
+  
+  "postCreateCommand": "bash -c 'dotnet restore backend/CollegeFootballGamePredictor.sln && cd frontend && npm install'",
+  "postStartCommand": "echo 'Dev container ready! Backend: http://localhost:5000 | Frontend: http://localhost:3000'",
+  
+  "remoteUser": "vscode",
+  
+  "customizations": {
+    "vscode": {
+      "settings": {
+        // Terminal
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "terminal.integrated.profiles.linux": {
+          "bash": {
+            "path": "bash",
+            "icon": "terminal-bash"
+          }
+        },
+        
+        // .NET
+        "dotnet.defaultSolution": "backend/CollegeFootballGamePredictor.sln",
+        "omnisharp.enableRoslynAnalyzers": true,
+        "omnisharp.enableEditorConfigSupport": true,
+        "omnisharp.enableImportCompletion": true,
+        "csharp.semanticHighlighting.enabled": true,
+        
+        // TypeScript/JavaScript
+        "typescript.tsdk": "frontend/node_modules/typescript/lib",
+        "typescript.enablePromptUseWorkspaceTsdk": true,
+        "javascript.updateImportsOnFileMove.enabled": "always",
+        "typescript.updateImportsOnFileMove.enabled": "always",
+        
+        // Formatting
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "[csharp]": {
+          "editor.defaultFormatter": "ms-dotnettools.csharp"
+        },
+        "[typescript]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[typescriptreact]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        "[json]": {
+          "editor.defaultFormatter": "esbenp.prettier-vscode"
+        },
+        
+        // ESLint
+        "eslint.workingDirectories": ["./frontend"],
+        "eslint.validate": [
+          "javascript",
+          "javascriptreact",
+          "typescript",
+          "typescriptreact"
+        ],
+        
+        // Files
+        "files.exclude": {
+          "**/node_modules": true,
+          "**/bin": true,
+          "**/obj": true
+        },
+        "files.watcherExclude": {
+          "**/node_modules/**": true,
+          "**/bin/**": true,
+          "**/obj/**": true
+        },
+        
+        // Editor
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "explicit"
+        },
+        "editor.rulers": [120],
+        "editor.tabSize": 2,
+        "[csharp]": {
+          "editor.tabSize": 4
+        },
+        
+        // Testing
+        "dotnet-test-explorer.testProjectPath": "backend/tests/**/*.csproj",
+        
+        // Git
+        "git.autofetch": true,
+        "git.confirmSync": false
+      },
+      
+      "extensions": [
+        // .NET Development
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        
+        // JavaScript/TypeScript
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        
+        // React
+        "dsznajder.es7-react-js-snippets",
+        
+        // Docker
+        "ms-azuretools.vscode-docker",
+        
+        // Database
+        "ckolkman.vscode-postgres",
+        
+        // Git
+        "eamodio.gitlens",
+        
+        // Testing
+        "hbenl.vscode-test-explorer",
+        "formulahendry.dotnet-test-explorer",
+        
+        // Utilities
+        "usernamehw.errorlens",
+        "streetsidesoftware.code-spell-checker",
+        "editorconfig.editorconfig",
+        
+        // GitHub
+        "github.copilot",
+        "github.copilot-chat",
+        "github.vscode-pull-request-github"
+      ]
+    }
+  },
+  
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true
+    }
+  }
+}
