@@ -149,48 +149,65 @@ public class DataRefreshService
     }
 
     /// <summary>
-    /// Refreshes team statistics for a specific season.
+    /// Refreshes team statistics for a specific season by calculating from game data.
     /// </summary>
     /// <param name="season">Season year (e.g., 2025).</param>
     /// <returns>Number of team stats records added or updated.</returns>
     public async Task<int> RefreshTeamStatsAsync(int season)
     {
-        _logger.LogInformation("Starting team stats refresh for season {Season}", season);
+        _logger.LogInformation("Starting team stats refresh for season {Season} (calculating from game data)", season);
         
         try
         {
             var externalStats = await _externalDataService.GetTeamStatsAsync(season);
+            var teams = await _context.Teams.ToListAsync();
             int updatedCount = 0;
 
-            foreach (var extStats in externalStats)
+            foreach (var team in teams)
             {
-                var teamId = $"team-{extStats.Team}";
+                // Get all games for this team in the season
+                var homeGames = await _context.Games
+                    .Where(g => g.HomeTeamId == team.TeamId && g.Date.Year == season && g.Status == GameStatus.Completed)
+                    .ToListAsync();
                 
-                // Ensure team exists
-                var team = await _context.Teams.FindAsync(teamId);
-                if (team == null)
+                var awayGames = await _context.Games
+                    .Where(g => g.AwayTeamId == team.TeamId && g.Date.Year == season && g.Status == GameStatus.Completed)
+                    .ToListAsync();
+
+                var totalGames = homeGames.Count + awayGames.Count;
+                if (totalGames == 0)
                 {
-                    _logger.LogWarning("Team {TeamId} not found, skipping stats", teamId);
+                    _logger.LogWarning("No completed games found for team {TeamName}, skipping stats", team.Name);
                     continue;
                 }
 
+                // Calculate points scored and allowed
+                var pointsScored = homeGames.Sum(g => g.HomeScore ?? 0) + awayGames.Sum(g => g.AwayScore ?? 0);
+                var pointsAllowed = homeGames.Sum(g => g.AwayScore ?? 0) + awayGames.Sum(g => g.HomeScore ?? 0);
+
+                var ppg = (double)pointsScored / totalGames;
+                var ppgAllowed = (double)pointsAllowed / totalGames;
+
+                // Get advanced stats for additional metrics
+                var advancedStats = externalStats.FirstOrDefault(s => s.Team == team.Name);
+
                 var existingStats = await _context.TeamStats
-                    .FirstOrDefaultAsync(s => s.TeamId == teamId && s.Season == season);
+                    .FirstOrDefaultAsync(s => s.TeamId == team.TeamId && s.Season == season);
 
                 if (existingStats != null)
                 {
                     // Update existing stats
-                    existingStats.Ppg = extStats.PointsPerGame ?? 0;
-                    existingStats.PpgAllowed = extStats.PointsAllowed ?? 0;
-                    existingStats.TotalOffenseRank = extStats.TotalOffenseRank ?? 999;
-                    existingStats.TotalDefenseRank = extStats.TotalDefenseRank ?? 999;
-                    existingStats.PassingYardsRank = extStats.PassingYardsRank ?? 999;
-                    existingStats.RushingYardsRank = extStats.RushingYardsRank ?? 999;
-                    existingStats.PassingYardsAllowedRank = extStats.PassingYardsAllowedRank ?? 999;
-                    existingStats.RushingYardsAllowedRank = extStats.RushingYardsAllowedRank ?? 999;
-                    existingStats.TurnoversLost = extStats.TurnoversLost ?? 0;
-                    existingStats.TurnoversForced = extStats.TurnoversGained ?? 0;
-                    existingStats.TurnoverMargin = extStats.TurnoverMargin ?? 0;
+                    existingStats.Ppg = ppg;
+                    existingStats.PpgAllowed = ppgAllowed;
+                    existingStats.TotalOffenseRank = advancedStats?.Offense?.Plays ?? 0;
+                    existingStats.TotalDefenseRank = advancedStats?.Defense?.Plays ?? 0;
+                    existingStats.PassingYardsRank = 0;
+                    existingStats.RushingYardsRank = 0;
+                    existingStats.PassingYardsAllowedRank = 0;
+                    existingStats.RushingYardsAllowedRank = 0;
+                    existingStats.TurnoversLost = 0;
+                    existingStats.TurnoversForced = 0;
+                    existingStats.TurnoverMargin = 0;
                     updatedCount++;
                 }
                 else
@@ -198,19 +215,19 @@ public class DataRefreshService
                     // Add new stats
                     var newStats = new TeamStats
                     {
-                        TeamId = teamId,
+                        TeamId = team.TeamId,
                         Season = season,
-                        Ppg = extStats.PointsPerGame ?? 0,
-                        PpgAllowed = extStats.PointsAllowed ?? 0,
-                        TotalOffenseRank = extStats.TotalOffenseRank ?? 999,
-                        TotalDefenseRank = extStats.TotalDefenseRank ?? 999,
-                        PassingYardsRank = extStats.PassingYardsRank ?? 999,
-                        RushingYardsRank = extStats.RushingYardsRank ?? 999,
-                        PassingYardsAllowedRank = extStats.PassingYardsAllowedRank ?? 999,
-                        RushingYardsAllowedRank = extStats.RushingYardsAllowedRank ?? 999,
-                        TurnoversLost = extStats.TurnoversLost ?? 0,
-                        TurnoversForced = extStats.TurnoversGained ?? 0,
-                        TurnoverMargin = extStats.TurnoverMargin ?? 0
+                        Ppg = ppg,
+                        PpgAllowed = ppgAllowed,
+                        TotalOffenseRank = advancedStats?.Offense?.Plays ?? 0,
+                        TotalDefenseRank = advancedStats?.Defense?.Plays ?? 0,
+                        PassingYardsRank = 0,
+                        RushingYardsRank = 0,
+                        PassingYardsAllowedRank = 0,
+                        RushingYardsAllowedRank = 0,
+                        TurnoversLost = 0,
+                        TurnoversForced = 0,
+                        TurnoverMargin = 0
                     };
                     _context.TeamStats.Add(newStats);
                     updatedCount++;
@@ -244,14 +261,16 @@ public class DataRefreshService
             var externalPlayers = await _externalDataService.GetTeamRosterAsync(teamName, season);
             int updatedCount = 0;
 
-            var teamId = $"team-{teamName}";
-            var team = await _context.Teams.FindAsync(teamId);
+            // Find the team by name, not by constructing team ID from name
+            var team = await _context.Teams.FirstOrDefaultAsync(t => t.Name == teamName);
             
             if (team == null)
             {
-                _logger.LogWarning("Team {TeamId} not found, cannot refresh roster", teamId);
+                _logger.LogWarning("Team with name '{TeamName}' not found, cannot refresh roster", teamName);
                 return 0;
             }
+
+            var teamId = team.TeamId;
 
             foreach (var extPlayer in externalPlayers)
             {
@@ -262,7 +281,7 @@ public class DataRefreshService
                 {
                     // Update existing player
                     existingPlayer.Name = extPlayer.Name;
-                    existingPlayer.Position = extPlayer.Position;
+                    existingPlayer.Position = extPlayer.Position ?? "Unknown";
                     existingPlayer.TeamId = teamId;
                     // Note: DOB, snaps, and depth chart would need additional data sources
                     updatedCount++;
@@ -274,9 +293,9 @@ public class DataRefreshService
                     {
                         PlayerId = playerId,
                         Name = extPlayer.Name,
-                        Position = extPlayer.Position,
+                        Position = extPlayer.Position ?? "Unknown",
                         TeamId = teamId,
-                        DateOfBirth = DateTime.Now.AddYears(-20), // Placeholder
+                        DateOfBirth = DateTime.UtcNow.AddYears(-20), // Placeholder
                         DepthChart = "Unknown",
                         SnapsPerGame = 0
                     };
@@ -298,6 +317,45 @@ public class DataRefreshService
     }
 
     /// <summary>
+    /// Refreshes roster data for all teams.
+    /// </summary>
+    /// <param name="season">Season year (e.g., 2025).</param>
+    /// <returns>Total number of players added or updated across all teams.</returns>
+    public async Task<int> RefreshAllRostersAsync(int season)
+    {
+        _logger.LogInformation("Starting roster refresh for all teams, season {Season}", season);
+        
+        try
+        {
+            // Get all teams
+            var teams = await _context.Teams.ToListAsync();
+            int totalUpdated = 0;
+
+            foreach (var team in teams)
+            {
+                try
+                {
+                    // Use the actual team name stored in the Name field
+                    var playerCount = await RefreshTeamRosterAsync(team.Name, season);
+                    totalUpdated += playerCount;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to refresh roster for team {TeamId}, continuing with other teams", team.TeamId);
+                }
+            }
+
+            _logger.LogInformation("Roster refresh complete: {Count} total players processed across all teams", totalUpdated);
+            return totalUpdated;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during roster refresh for all teams");
+            throw;
+        }
+    }
+
+    /// <summary>
     /// Performs a complete data refresh: teams, schedule, stats, and rosters.
     /// </summary>
     /// <param name="season">Season year (e.g., 2025).</param>
@@ -307,24 +365,69 @@ public class DataRefreshService
         _logger.LogInformation("Starting complete data refresh for season {Season}", season);
         
         var result = new DataRefreshResult { Season = season };
+        var errors = new List<string>();
 
         try
         {
             // 1. Refresh teams
-            result.TeamsUpdated = await RefreshTeamsAsync();
+            try
+            {
+                result.TeamsUpdated = await RefreshTeamsAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to refresh teams data");
+                errors.Add($"Teams refresh failed: {ex.Message}");
+            }
 
             // 2. Refresh schedule
-            result.GamesUpdated = await RefreshScheduleAsync(season);
+            try
+            {
+                result.GamesUpdated = await RefreshScheduleAsync(season);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to refresh schedule data");
+                errors.Add($"Schedule refresh failed: {ex.Message}");
+            }
 
             // 3. Refresh team stats
-            result.StatsUpdated = await RefreshTeamStatsAsync(season);
+            try
+            {
+                result.StatsUpdated = await RefreshTeamStatsAsync(season);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to refresh team stats data");
+                errors.Add($"Team stats refresh failed: {ex.Message}");
+            }
 
-            result.Success = true;
+            // 4. Refresh rosters (optional, may be slow)
+            try
+            {
+                result.RostersUpdated = await RefreshAllRostersAsync(season);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to refresh roster data");
+                errors.Add($"Roster refresh failed: {ex.Message}");
+            }
+
+            // Set success if we got at least teams or games, even if stats failed
+            result.Success = result.TeamsUpdated > 0 || result.GamesUpdated > 0;
             result.CompletedAt = DateTime.UtcNow;
 
-            _logger.LogInformation(
-                "Complete data refresh finished: {Teams} teams, {Games} games, {Stats} stats records",
-                result.TeamsUpdated, result.GamesUpdated, result.StatsUpdated);
+            if (errors.Any())
+            {
+                result.ErrorMessage = string.Join("; ", errors);
+                _logger.LogWarning("Data refresh completed with errors: {Errors}", result.ErrorMessage);
+            }
+            else
+            {
+                _logger.LogInformation(
+                    "Complete data refresh finished: {Teams} teams, {Games} games, {Stats} stats, {Rosters} rosters updated",
+                    result.TeamsUpdated, result.GamesUpdated, result.StatsUpdated, result.RostersUpdated);
+            }
         }
         catch (Exception ex)
         {

@@ -121,14 +121,14 @@ const ScheduleSelector: React.FC<ScheduleSelectorProps> = ({
               <div className="team away-team">
                 <span className="team-label">Away</span>
                 <span className="team-name">
-                  {game.awayTeam?.name || game.awayTeamId}
+                  {game.awayTeamName || game.awayTeamId}
                 </span>
               </div>
               <div className="vs">@</div>
               <div className="team home-team">
                 <span className="team-label">Home</span>
                 <span className="team-name">
-                  {game.homeTeam?.name || game.homeTeamId}
+                  {game.homeTeamName || game.homeTeamId}
                 </span>
               </div>
             </div>

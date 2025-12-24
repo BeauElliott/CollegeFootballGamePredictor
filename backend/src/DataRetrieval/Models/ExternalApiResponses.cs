@@ -16,24 +16,31 @@ public class ExternalGameResponse
 }
 
 /// <summary>
-/// Response from College Football Data API for team statistics.
+/// Response from College Football Data API for team statistics (advanced stats endpoint).
 /// </summary>
 public class ExternalTeamStatsResponse
 {
     public string Team { get; set; } = string.Empty;
     public string Conference { get; set; } = string.Empty;
     public int Season { get; set; }
-    public double? PointsPerGame { get; set; }
-    public double? PointsAllowed { get; set; }
-    public int? TotalOffenseRank { get; set; }
-    public int? TotalDefenseRank { get; set; }
-    public int? PassingYardsRank { get; set; }
-    public int? RushingYardsRank { get; set; }
-    public int? PassingYardsAllowedRank { get; set; }
-    public int? RushingYardsAllowedRank { get; set; }
-    public int? TurnoversLost { get; set; }
-    public int? TurnoversGained { get; set; }
-    public double? TurnoverMargin { get; set; }
+    public OffenseStats? Offense { get; set; }
+    public DefenseStats? Defense { get; set; }
+}
+
+public class OffenseStats
+{
+    public int? Plays { get; set; }
+    public double? Ppa { get; set; }
+    public double? SuccessRate { get; set; }
+    public double? Explosiveness { get; set; }
+}
+
+public class DefenseStats
+{
+    public int? Plays { get; set; }
+    public double? Ppa { get; set; }
+    public double? SuccessRate { get; set; }
+    public double? Explosiveness { get; set; }
 }
 
 /// <summary>
@@ -44,8 +51,8 @@ public class ExternalPlayerResponse
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Team { get; set; } = string.Empty;
-    public string Position { get; set; } = string.Empty;
-    public string? Height { get; set; }
+    public string? Position { get; set; }
+    public int? Height { get; set; }
     public int? Weight { get; set; }
     public int? Jersey { get; set; }
     public int? Year { get; set; }

@@ -15,8 +15,8 @@ describe('App', () => {
 
   test('renders app title', () => {
     render(<App />);
-    const titleElement = screen.getByText(/college football game predictor/i);
-    expect(titleElement).toBeInTheDocument();
+    const titleElement = screen.getByRole('heading', { level: 1 });
+    expect(titleElement).toHaveTextContent('College Football Game Predictor');
   });
 
   test('renders app subtitle', () => {
@@ -28,7 +28,7 @@ describe('App', () => {
   test('renders both ScheduleSelector and PredictionForm sections', () => {
     render(<App />);
     
-    expect(screen.getByText(/select a game/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 2 })).toHaveTextContent('Select a Game');
     expect(screen.getByText(/please select a game to predict/i)).toBeInTheDocument();
   });
 

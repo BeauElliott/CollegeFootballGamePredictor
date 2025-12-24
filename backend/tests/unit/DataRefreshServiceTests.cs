@@ -151,10 +151,16 @@ public class DataRefreshServiceTests : IDisposable
                 {
                     Team = "Alabama",
                     Season = season,
-                    PointsPerGame = 35.5,
-                    PointsAllowed = 15.2,
-                    TotalOffenseRank = 5,
-                    TotalDefenseRank = 3
+                    Offense = new DataRetrieval.Models.OffenseStats
+                    {
+                        Ppa = 0.35,
+                        Plays = 800
+                    },
+                    Defense = new DataRetrieval.Models.DefenseStats
+                    {
+                        Ppa = 0.15,
+                        Plays = 650
+                    }
                 }
             });
 

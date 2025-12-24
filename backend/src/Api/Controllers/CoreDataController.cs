@@ -1,5 +1,6 @@
 using DataRetrieval.Data;
 using DataRetrieval.Entities;
+using Api.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,9 +32,9 @@ public class CoreDataController : ControllerBase
     /// <response code="200">Returns list of upcoming games.</response>
     /// <response code="500">Internal server error.</response>
     [HttpGet("schedule/upcoming")]
-    [ProducesResponseType(typeof(List<Game>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<GameDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<List<Game>>> GetUpcomingGames([FromQuery] int limit = 20)
+    public async Task<ActionResult<List<GameDto>>> GetUpcomingGames([FromQuery] int limit = 20)
     {
         try
         {
@@ -43,6 +44,19 @@ public class CoreDataController : ControllerBase
                 .Where(g => g.Status == GameStatus.Scheduled && g.Date > DateTime.UtcNow)
                 .OrderBy(g => g.Date)
                 .Take(limit)
+                .Select(g => new GameDto
+                {
+                    GameId = g.GameId,
+                    Date = g.Date,
+                    Location = g.Location,
+                    Status = g.Status,
+                    HomeTeamId = g.HomeTeamId,
+                    HomeTeamName = g.HomeTeam!.Name,
+                    AwayTeamId = g.AwayTeamId,
+                    AwayTeamName = g.AwayTeam!.Name,
+                    HomeScore = g.HomeScore,
+                    AwayScore = g.AwayScore
+                })
                 .ToListAsync();
 
             _logger.LogInformation("Retrieved {Count} upcoming games", games.Count);

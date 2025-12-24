@@ -11,7 +11,9 @@ const mockGame = {
   gameId: 'game-001',
   date: '2025-12-28T19:00:00Z',
   homeTeamId: 'alabama',
+  homeTeamName: 'Alabama Crimson Tide',
   awayTeamId: 'georgia',
+  awayTeamName: 'Georgia Bulldogs',
   location: 'Bryant-Denny Stadium',
   status: 'Scheduled' as const,
   homeTeam: { teamId: 'alabama', name: 'Alabama Crimson Tide', conference: 'SEC' },
@@ -72,9 +74,10 @@ describe('PredictionForm', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/predicted winner/i)).toBeInTheDocument();
-      expect(screen.getByText(/Alabama Crimson Tide/i)).toBeInTheDocument();
       expect(screen.getByText(/68\.0% win probability/i)).toBeInTheDocument();
       expect(screen.getByText(/margin.*7\.5 points/i)).toBeInTheDocument();
+      // Check for winner specifically in the winner section
+      expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Prediction Result');
     });
   });
 

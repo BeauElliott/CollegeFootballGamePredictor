@@ -22,7 +22,7 @@ describe('API Service', () => {
       const result = await api.getUpcomingGames();
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/schedule/upcoming'),
+        expect.stringContaining('/api/coredata/schedule/upcoming'),
         expect.objectContaining({
           headers: expect.objectContaining({
             'Content-Type': 'application/json',
@@ -47,7 +47,7 @@ describe('API Service', () => {
       const result = await api.getTeams();
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/teams'),
+        expect.stringContaining('/api/coredata/teams'),
         expect.any(Object)
       );
       expect(result).toEqual(mockTeams);

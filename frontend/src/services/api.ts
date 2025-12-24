@@ -13,7 +13,9 @@ export interface Game {
   gameId: string;
   date: string;
   homeTeamId: string;
+  homeTeamName: string;
   awayTeamId: string;
+  awayTeamName: string;
   location: string;
   status: 'Scheduled' | 'InProgress' | 'Completed' | 'Postponed' | 'Cancelled';
   homeScore?: number;

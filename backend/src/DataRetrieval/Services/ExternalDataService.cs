@@ -92,7 +92,7 @@ public class ExternalDataService
 
         try
         {
-            var url = $"{_config.CollegeFootballData.BaseUrl}/stats/season?year={season}";
+            var url = $"{_config.CollegeFootballData.BaseUrl}/stats/season/advanced?year={season}";
 
             _httpClient.DefaultRequestHeaders.Clear();
             if (!string.IsNullOrEmpty(_config.CollegeFootballData.ApiKey))
@@ -100,9 +100,17 @@ public class ExternalDataService
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.CollegeFootballData.ApiKey}");
             }
 
-            _logger.LogInformation("Fetching team stats for season {Season}", season);
+            _logger.LogInformation("Fetching team stats for season {Season} from: {Url}", season, url);
 
             var response = await _httpClient.GetAsync(url);
+            
+            // Check for specific error codes that might indicate data unavailability
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _logger.LogWarning("Team stats data not available for season {Season} (404 Not Found)", season);
+                return new List<ExternalTeamStatsResponse>();
+            }
+            
             response.EnsureSuccessStatusCode();
 
             var stats = await response.Content.ReadFromJsonAsync<List<ExternalTeamStatsResponse>>();
@@ -147,9 +155,17 @@ public class ExternalDataService
                 _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.CollegeFootballData.ApiKey}");
             }
 
-            _logger.LogInformation("Fetching roster for team {Team}, season {Season}", teamName, season);
+            _logger.LogInformation("Fetching roster for team {Team}, season {Season} from: {Url}", teamName, season, url);
 
             var response = await _httpClient.GetAsync(url);
+            
+            // Check for specific error codes that might indicate data unavailability
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _logger.LogWarning("Roster data not available for team {Team}, season {Season} (404 Not Found)", teamName, season);
+                return new List<ExternalPlayerResponse>();
+            }
+            
             response.EnsureSuccessStatusCode();
 
             var roster = await response.Content.ReadFromJsonAsync<List<ExternalPlayerResponse>>();
