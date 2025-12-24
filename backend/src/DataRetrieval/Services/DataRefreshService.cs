@@ -163,6 +163,9 @@ public class DataRefreshService
             var teams = await _context.Teams.ToListAsync();
             int updatedCount = 0;
 
+            // First pass: calculate all stats
+            var teamStatsData = new List<(string TeamId, double Ppg, double PpgAllowed, double OffensePPA, double DefensePPA, double RushingPPA, double PassingPPA, double RushingPPAAllowed, double PassingPPAAllowed)>();
+            
             foreach (var team in teams)
             {
                 // Get all games for this team in the season
@@ -177,7 +180,6 @@ public class DataRefreshService
                 var totalGames = homeGames.Count + awayGames.Count;
                 if (totalGames == 0)
                 {
-                    _logger.LogWarning("No completed games found for team {TeamName}, skipping stats", team.Name);
                     continue;
                 }
 
@@ -190,24 +192,46 @@ public class DataRefreshService
 
                 // Get advanced stats for additional metrics
                 var advancedStats = externalStats.FirstOrDefault(s => s.Team == team.Name);
+                var offensePPA = advancedStats?.Offense?.Ppa ?? 0;
+                var defensePPA = advancedStats?.Defense?.Ppa ?? 0;
+                var rushingPPA = advancedStats?.Offense?.RushingPlays?.Ppa ?? 0;
+                var passingPPA = advancedStats?.Offense?.PassingPlays?.Ppa ?? 0;
+                var rushingPPAAllowed = advancedStats?.Defense?.RushingPlays?.Ppa ?? 0;
+                var passingPPAAllowed = advancedStats?.Defense?.PassingPlays?.Ppa ?? 0;
 
+                teamStatsData.Add((team.TeamId, ppg, ppgAllowed, offensePPA, defensePPA, rushingPPA, passingPPA, rushingPPAAllowed, passingPPAAllowed));
+            }
+
+            // Calculate rankings
+            var ppgRanked = teamStatsData.OrderByDescending(t => t.Ppg).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+            var ppgAllowedRanked = teamStatsData.OrderBy(t => t.PpgAllowed).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+            var offensePPARanked = teamStatsData.OrderByDescending(t => t.OffensePPA).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+            var defensePPARanked = teamStatsData.OrderBy(t => t.DefensePPA).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+            var rushingPPARanked = teamStatsData.OrderByDescending(t => t.RushingPPA).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+            var passingPPARanked = teamStatsData.OrderByDescending(t => t.PassingPPA).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+            var rushingPPAAllowedRanked = teamStatsData.OrderBy(t => t.RushingPPAAllowed).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+            var passingPPAAllowedRanked = teamStatsData.OrderBy(t => t.PassingPPAAllowed).Select((t, i) => (t.TeamId, Rank: i + 1)).ToDictionary(x => x.TeamId, x => x.Rank);
+
+            // Second pass: save stats with rankings
+            foreach (var teamData in teamStatsData)
+            {
                 var existingStats = await _context.TeamStats
-                    .FirstOrDefaultAsync(s => s.TeamId == team.TeamId && s.Season == season);
+                    .FirstOrDefaultAsync(s => s.TeamId == teamData.TeamId && s.Season == season);
 
                 if (existingStats != null)
                 {
                     // Update existing stats
-                    existingStats.Ppg = ppg;
-                    existingStats.PpgAllowed = ppgAllowed;
-                    existingStats.TotalOffenseRank = advancedStats?.Offense?.Plays ?? 0;
-                    existingStats.TotalDefenseRank = advancedStats?.Defense?.Plays ?? 0;
-                    existingStats.PassingYardsRank = 0;
-                    existingStats.RushingYardsRank = 0;
-                    existingStats.PassingYardsAllowedRank = 0;
-                    existingStats.RushingYardsAllowedRank = 0;
-                    existingStats.TurnoversLost = 0;
-                    existingStats.TurnoversForced = 0;
-                    existingStats.TurnoverMargin = 0;
+                    existingStats.Ppg = teamData.Ppg;
+                    existingStats.PpgAllowed = teamData.PpgAllowed;
+                    existingStats.TotalOffenseRank = offensePPARanked.GetValueOrDefault(teamData.TeamId, 999);
+                    existingStats.TotalDefenseRank = defensePPARanked.GetValueOrDefault(teamData.TeamId, 999);
+                    existingStats.PassingYardsRank = passingPPARanked.GetValueOrDefault(teamData.TeamId, 999);
+                    existingStats.RushingYardsRank = rushingPPARanked.GetValueOrDefault(teamData.TeamId, 999);
+                    existingStats.PassingYardsAllowedRank = passingPPAAllowedRanked.GetValueOrDefault(teamData.TeamId, 999);
+                    existingStats.RushingYardsAllowedRank = rushingPPAAllowedRanked.GetValueOrDefault(teamData.TeamId, 999);
+                    existingStats.TurnoversLost = 0; // Not available in current APIs
+                    existingStats.TurnoversForced = 0; // Not available in current APIs
+                    existingStats.TurnoverMargin = 0; // Not available in current APIs
                     updatedCount++;
                 }
                 else
@@ -215,16 +239,16 @@ public class DataRefreshService
                     // Add new stats
                     var newStats = new TeamStats
                     {
-                        TeamId = team.TeamId,
+                        TeamId = teamData.TeamId,
                         Season = season,
-                        Ppg = ppg,
-                        PpgAllowed = ppgAllowed,
-                        TotalOffenseRank = advancedStats?.Offense?.Plays ?? 0,
-                        TotalDefenseRank = advancedStats?.Defense?.Plays ?? 0,
-                        PassingYardsRank = 0,
-                        RushingYardsRank = 0,
-                        PassingYardsAllowedRank = 0,
-                        RushingYardsAllowedRank = 0,
+                        Ppg = teamData.Ppg,
+                        PpgAllowed = teamData.PpgAllowed,
+                        TotalOffenseRank = offensePPARanked.GetValueOrDefault(teamData.TeamId, 999),
+                        TotalDefenseRank = defensePPARanked.GetValueOrDefault(teamData.TeamId, 999),
+                        PassingYardsRank = passingPPARanked.GetValueOrDefault(teamData.TeamId, 999),
+                        RushingYardsRank = rushingPPARanked.GetValueOrDefault(teamData.TeamId, 999),
+                        PassingYardsAllowedRank = passingPPAAllowedRanked.GetValueOrDefault(teamData.TeamId, 999),
+                        RushingYardsAllowedRank = rushingPPAAllowedRanked.GetValueOrDefault(teamData.TeamId, 999),
                         TurnoversLost = 0,
                         TurnoversForced = 0,
                         TurnoverMargin = 0
@@ -259,6 +283,11 @@ public class DataRefreshService
         try
         {
             var externalPlayers = await _externalDataService.GetTeamRosterAsync(teamName, season);
+            var playerUsage = await _externalDataService.GetPlayerUsageAsync(teamName, season);
+            
+            // Create a dictionary for quick usage lookup by player ID
+            var usageByPlayerId = playerUsage.ToDictionary(u => u.Id, u => u.Usage?.Overall ?? 0);
+            
             int updatedCount = 0;
 
             // Find the team by name, not by constructing team ID from name
@@ -272,32 +301,43 @@ public class DataRefreshService
 
             var teamId = team.TeamId;
 
+            // Estimate average plays per game (typical is ~65-75 plays per game)
+            const double AVERAGE_PLAYS_PER_GAME = 70.0;
+
             foreach (var extPlayer in externalPlayers)
             {
                 var playerId = $"player-{extPlayer.Id}";
                 var existingPlayer = await _context.Players.FindAsync(playerId);
 
+                // Get usage data for this player
+                var usagePercentage = usageByPlayerId.GetValueOrDefault(extPlayer.Id.ToString(), 0);
+                var snapsPerGame = usagePercentage * AVERAGE_PLAYS_PER_GAME;
+                
+                // Estimate depth chart based on snap percentage
+                var depthChart = EstimateDepthChart(usagePercentage, extPlayer.Position);
+
                 if (existingPlayer != null)
                 {
                     // Update existing player
-                    existingPlayer.Name = extPlayer.Name;
+                    existingPlayer.Name = extPlayer.FullName;
                     existingPlayer.Position = extPlayer.Position ?? "Unknown";
                     existingPlayer.TeamId = teamId;
-                    // Note: DOB, snaps, and depth chart would need additional data sources
+                    existingPlayer.SnapsPerGame = snapsPerGame;
+                    existingPlayer.DepthChart = depthChart;
                     updatedCount++;
                 }
                 else
                 {
-                    // Add new player (with placeholder data for missing fields)
+                    // Add new player
                     var newPlayer = new Player
                     {
                         PlayerId = playerId,
-                        Name = extPlayer.Name,
+                        Name = extPlayer.FullName,
                         Position = extPlayer.Position ?? "Unknown",
                         TeamId = teamId,
                         DateOfBirth = DateTime.UtcNow.AddYears(-20), // Placeholder
-                        DepthChart = "Unknown",
-                        SnapsPerGame = 0
+                        DepthChart = depthChart,
+                        SnapsPerGame = snapsPerGame
                     };
                     _context.Players.Add(newPlayer);
                     updatedCount++;
@@ -313,6 +353,40 @@ public class DataRefreshService
         {
             _logger.LogError(ex, "Error refreshing roster for team {Team}", teamName);
             throw;
+        }
+    }
+
+    /// <summary>
+    /// Estimates depth chart position based on snap percentage and position.
+    /// </summary>
+    private string EstimateDepthChart(double usagePercentage, string? position)
+    {
+        // Special handling for specialists who may have high usage but aren't "starters" in traditional sense
+        if (position == "K" || position == "P" || position == "LS")
+        {
+            return usagePercentage > 0.5 ? "Starter" : "Backup";
+        }
+
+        // For other positions, use snap percentage thresholds
+        if (usagePercentage >= 0.70)
+        {
+            return "Starter (1st)";
+        }
+        else if (usagePercentage >= 0.30)
+        {
+            return "Backup (2nd)";
+        }
+        else if (usagePercentage >= 0.10)
+        {
+            return "Reserve (3rd)";
+        }
+        else if (usagePercentage > 0)
+        {
+            return "Deep Reserve";
+        }
+        else
+        {
+            return "Unknown";
         }
     }
 

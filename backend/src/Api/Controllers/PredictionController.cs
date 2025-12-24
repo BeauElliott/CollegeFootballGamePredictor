@@ -49,16 +49,13 @@ public class PredictionController : ControllerBase
 
         _logger.LogInformation("Prediction requested for game {GameId}", request.GameId);
 
-        // Fetch game with related teams, stats, and rosters
+        // Fetch game with related teams and stats (use AsSplitQuery to avoid cartesian explosion)
         var game = await _context.Games
             .Include(g => g.HomeTeam)
                 .ThenInclude(t => t!.Stats)
-            .Include(g => g.HomeTeam)
-                .ThenInclude(t => t!.Roster)
             .Include(g => g.AwayTeam)
                 .ThenInclude(t => t!.Stats)
-            .Include(g => g.AwayTeam)
-                .ThenInclude(t => t!.Roster)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(g => g.GameId == request.GameId);
 
         if (game == null)
@@ -72,6 +69,19 @@ public class PredictionController : ControllerBase
             _logger.LogError("Game {GameId} has missing team data", request.GameId);
             return BadRequest(new { error = "Game has incomplete team data" });
         }
+
+        // Load rosters separately to avoid slow queries
+        var homeRoster = await _context.Players
+            .Where(p => p.TeamId == game.HomeTeamId)
+            .ToListAsync();
+        
+        var awayRoster = await _context.Players
+            .Where(p => p.TeamId == game.AwayTeamId)
+            .ToListAsync();
+
+        // Assign rosters to teams
+        game.HomeTeam.Roster = homeRoster;
+        game.AwayTeam.Roster = awayRoster;
 
         // Generate prediction
         var predictionResult = _predictionService.PredictGame(game, game.HomeTeam, game.AwayTeam);
@@ -129,13 +139,15 @@ public class PredictionController : ControllerBase
         {
             GameId = predictionResult.GameId,
             PredictedWinner = predictionResult.PredictedWinnerName,
+            PredictedWinnerId = predictionResult.PredictedWinnerId,
             WinProbability = predictionResult.WinProbability,
             Margin = predictionResult.Margin,
+            Timestamp = DateTime.UtcNow,
             Breakdown = new PredictionBreakdownResponse
             {
                 StatsEdge = predictionResult.StatsEdge,
                 BiorhythmEdge = predictionResult.BiorhythmEdge,
-                HomeFieldAdjustment = predictionResult.HomeFieldAdjustment,
+                HomeFieldAdvantage = predictionResult.HomeFieldAdjustment,
                 Explanation = predictionResult.Explanation
             }
         };

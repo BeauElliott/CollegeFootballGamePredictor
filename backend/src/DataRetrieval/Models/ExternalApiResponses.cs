@@ -33,6 +33,8 @@ public class OffenseStats
     public double? Ppa { get; set; }
     public double? SuccessRate { get; set; }
     public double? Explosiveness { get; set; }
+    public PlayStats? RushingPlays { get; set; }
+    public PlayStats? PassingPlays { get; set; }
 }
 
 public class DefenseStats
@@ -41,6 +43,16 @@ public class DefenseStats
     public double? Ppa { get; set; }
     public double? SuccessRate { get; set; }
     public double? Explosiveness { get; set; }
+    public PlayStats? RushingPlays { get; set; }
+    public PlayStats? PassingPlays { get; set; }
+}
+
+public class PlayStats
+{
+    public double? Rate { get; set; }
+    public double? Ppa { get; set; }
+    public double? TotalPPA { get; set; }
+    public double? SuccessRate { get; set; }
 }
 
 /// <summary>
@@ -49,13 +61,43 @@ public class DefenseStats
 public class ExternalPlayerResponse
 {
     public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public string? FirstName { get; set; }
+    public string? LastName { get; set; }
     public string Team { get; set; } = string.Empty;
     public string? Position { get; set; }
     public int? Height { get; set; }
     public int? Weight { get; set; }
     public int? Jersey { get; set; }
     public int? Year { get; set; }
+    
+    // Computed property to get full name
+    public string FullName => $"{FirstName} {LastName}".Trim();
+}
+
+/// <summary>
+/// Response from College Football Data API for player usage statistics.
+/// </summary>
+public class ExternalPlayerUsageResponse
+{
+    public int Season { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Position { get; set; } = string.Empty;
+    public string Team { get; set; } = string.Empty;
+    public string Conference { get; set; } = string.Empty;
+    public UsageStats? Usage { get; set; }
+}
+
+public class UsageStats
+{
+    public double? Overall { get; set; }
+    public double? Pass { get; set; }
+    public double? Rush { get; set; }
+    public double? FirstDown { get; set; }
+    public double? SecondDown { get; set; }
+    public double? ThirdDown { get; set; }
+    public double? StandardDowns { get; set; }
+    public double? PassingDowns { get; set; }
 }
 
 /// <summary>

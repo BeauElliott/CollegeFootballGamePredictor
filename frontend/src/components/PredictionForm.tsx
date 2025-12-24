@@ -54,9 +54,9 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ game }) => {
     if (!prediction || !game) return '';
     
     if (prediction.predictedWinnerId === game.homeTeamId) {
-      return game.homeTeam?.name || game.homeTeamId;
+      return game.homeTeamName;
     }
-    return game.awayTeam?.name || game.awayTeamId;
+    return game.awayTeamName;
   };
 
   /**
@@ -90,12 +90,12 @@ const PredictionForm: React.FC<PredictionFormProps> = ({ game }) => {
         <div className="matchup">
           <div className="team-info">
             <span className="team-label">Away</span>
-            <span className="team-name">{game.awayTeam?.name || game.awayTeamId}</span>
+            <span className="team-name">{game.awayTeamName}</span>
           </div>
           <div className="at">@</div>
           <div className="team-info">
             <span className="team-label">Home</span>
-            <span className="team-name">{game.homeTeam?.name || game.homeTeamId}</span>
+            <span className="team-name">{game.homeTeamName}</span>
           </div>
         </div>
         <div className="game-meta">

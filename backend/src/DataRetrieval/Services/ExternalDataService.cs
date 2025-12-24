@@ -187,6 +187,61 @@ public class ExternalDataService
     }
 
     /// <summary>
+    /// Fetches player usage statistics for a specific team and season.
+    /// </summary>
+    /// <param name="teamName">Team name.</param>
+    /// <param name="season">Season year (e.g., 2025).</param>
+    /// <returns>List of player usage statistics.</returns>
+    public virtual async Task<List<ExternalPlayerUsageResponse>> GetPlayerUsageAsync(string teamName, int season)
+    {
+        if (!_config.CollegeFootballData.Enabled)
+        {
+            _logger.LogWarning("College Football Data API is disabled");
+            return new List<ExternalPlayerUsageResponse>();
+        }
+
+        try
+        {
+            var url = $"{_config.CollegeFootballData.BaseUrl}/player/usage?team={Uri.EscapeDataString(teamName)}&year={season}";
+
+            _httpClient.DefaultRequestHeaders.Clear();
+            if (!string.IsNullOrEmpty(_config.CollegeFootballData.ApiKey))
+            {
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {_config.CollegeFootballData.ApiKey}");
+            }
+
+            _logger.LogInformation("Fetching player usage for team {Team}, season {Season}", teamName, season);
+
+            var response = await _httpClient.GetAsync(url);
+            
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                _logger.LogWarning("Player usage data not available for team {Team}, season {Season} (404 Not Found)", teamName, season);
+                return new List<ExternalPlayerUsageResponse>();
+            }
+            
+            response.EnsureSuccessStatusCode();
+
+            var usage = await response.Content.ReadFromJsonAsync<List<ExternalPlayerUsageResponse>>();
+            
+            _logger.LogInformation("Retrieved usage data for {Count} players for {Team}", usage?.Count ?? 0, teamName);
+            
+            return usage ?? new List<ExternalPlayerUsageResponse>();
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP error fetching player usage for {Team}", teamName);
+            // Don't throw - this is supplementary data
+            return new List<ExternalPlayerUsageResponse>();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error fetching player usage for {Team}", teamName);
+            return new List<ExternalPlayerUsageResponse>();
+        }
+    }
+
+    /// <summary>
     /// Fetches list of all teams from College Football Data API.
     /// </summary>
     /// <returns>List of teams.</returns>

@@ -16,9 +16,19 @@ public class PredictionResponse
     public string PredictedWinner { get; set; } = string.Empty;
 
     /// <summary>
+    /// Team ID of the predicted winner.
+    /// </summary>
+    public string PredictedWinnerId { get; set; } = string.Empty;
+
+    /// <summary>
     /// Probability of the predicted winner winning (0.0 to 1.0).
     /// </summary>
     public double WinProbability { get; set; }
+
+    /// <summary>
+    /// Timestamp when the prediction was generated.
+    /// </summary>
+    public DateTime Timestamp { get; set; }
 
     /// <summary>
     /// Predicted margin of victory in points.
@@ -49,7 +59,7 @@ public class PredictionBreakdownResponse
     /// <summary>
     /// Home field advantage in points.
     /// </summary>
-    public double HomeFieldAdjustment { get; set; }
+    public double HomeFieldAdvantage { get; set; }
 
     /// <summary>
     /// Human-readable explanation of the prediction.
